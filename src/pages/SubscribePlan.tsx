@@ -1,19 +1,38 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePlans } from '../hooks/usePlans';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Check, ArrowRight, ShieldCheck, Zap, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { supabase } from '../integrations/supabase/client';
+import { DEFAULT_ADMIN_SETTINGS } from '../constants';
+import PlanCreditsPreview from '../components/PlanCreditsPreview';
 
 const SubscribePlan = () => {
   const { plans } = usePlans();
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [limits, setLimits] = useState({ 
+    free: DEFAULT_ADMIN_SETTINGS.freeMonthlyLimit, 
+    admin: DEFAULT_ADMIN_SETTINGS.adminMonthlyLimit 
+  });
+
+  useEffect(() => {
+    const fetchLimits = async () => {
+      const { data } = await supabase.from('admin_settings').select('free_monthly_limit, admin_monthly_limit').limit(1).single();
+      if (data) {
+        setLimits({ 
+          free: typeof data.free_monthly_limit === 'number' ? data.free_monthly_limit : 3, 
+          admin: typeof data.admin_monthly_limit === 'number' ? data.admin_monthly_limit : 9999 
+        });
+      }
+    };
+    fetchLimits();
+  }, []);
 
   const handleCheckoutClick = (e: React.MouseEvent<HTMLAnchorElement>, baseLink: string) => {
-    // Se não estiver logado, cancela o clique e joga pro login
     if (!user) {
       e.preventDefault();
       navigate('/login');
@@ -24,28 +43,19 @@ const SubscribePlan = () => {
   const getCheckoutUrl = (baseLink: string) => {
     if (!baseLink) return '#';
     const cleanLink = baseLink.trim();
-    
-    // Se não houver usuário logado (redundância de segurança), retorna o link limpo
     if (!user) return cleanLink;
     
     const params = new URLSearchParams();
-    
-    // E-mail do usuário (Sessão Supabase)
     if (user.email) {
       params.set('email', user.email);
     }
-    
-    // Nome do perfil (Tabela Profiles)
     const fullName = `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim();
     if (fullName) {
       params.set('name', fullName);
     }
-    
-    // Telefone (Tabela Profiles) - Adicionando 55 como padrão Brasil
     if (profile?.whatsapp) {
       const digitsOnly = profile.whatsapp.replace(/\D/g, '');
       if (digitsOnly) {
-        // Se o usuário já não digitou o 55, nós adicionamos
         const phoneWithCountry = digitsOnly.startsWith('55') ? digitsOnly : `55${digitsOnly}`;
         params.set('phone', phoneWithCountry);
       }
@@ -57,6 +67,13 @@ const SubscribePlan = () => {
     const separator = cleanLink.includes('?') ? '&' : '?';
     return `${cleanLink}${separator}${queryString}`;
   };
+
+  // Cálculo de limites atuais do usuário
+  const totalLimit = isAdmin 
+    ? limits.admin 
+    : (profile?.total_purchased_credits || 0) + limits.free;
+  
+  const used = profile?.credits_used || 0;
 
   return (
     <div className="min-h-full bg-[#0B1120] text-white overflow-hidden relative">
@@ -109,6 +126,16 @@ const SubscribePlan = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Box de simulação interativa de créditos se o usuário estiver logado */}
+              {user && (
+                <PlanCreditsPreview
+                  used={used}
+                  currentLimit={totalLimit}
+                  planLimit={plan.monthly_limit}
+                  isAdmin={!!isAdmin}
+                />
+              )}
 
               <a 
                 href={getCheckoutUrl(plan.checkout_link)}
