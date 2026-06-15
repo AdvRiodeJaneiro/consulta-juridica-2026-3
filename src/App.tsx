@@ -73,9 +73,12 @@ const AppContent: React.FC = () => {
     fetchSettings();
   }, [profile?.credits_used]);
 
+  const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
+
   const handleSendMessage = useCallback(async (text: string, file?: FileAttachment) => {
     if (!user) {
       setPendingMessage(text);
+      if (file) setPendingFile(file);
       setIsAuthModalOpen(true);
       return;
     }
@@ -132,12 +135,13 @@ const AppContent: React.FC = () => {
   }, [chatState.messages, location.pathname, adminSettings, navigate, user, profile, refreshProfile]);
 
   useEffect(() => {
-    if (user && pendingMessage && !pendingMessageSent.current) {
+    if (user && (pendingMessage || pendingFile) && !pendingMessageSent.current) {
       pendingMessageSent.current = true;
-      handleSendMessage(pendingMessage);
+      handleSendMessage(pendingMessage || '', pendingFile || undefined);
       setPendingMessage(null);
+      setPendingFile(null);
     }
-  }, [user, pendingMessage, handleSendMessage]);
+  }, [user, pendingMessage, pendingFile, handleSendMessage]);
 
   return (
     <>
