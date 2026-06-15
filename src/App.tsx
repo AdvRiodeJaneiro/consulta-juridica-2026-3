@@ -92,6 +92,8 @@ const AppContent: React.FC = () => {
       return;
     }
 
+    if (!text.trim() && !file) return; // Evita processar mensagens vazias sem anexo
+
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',

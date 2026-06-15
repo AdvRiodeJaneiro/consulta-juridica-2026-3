@@ -3,6 +3,7 @@ import { transcribeAudio, blobToBase64 } from '../services/gemini';
 import { Mic, Loader2, Send, Paperclip, X, FileText, Image as ImageIcon, File } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { FileAttachment } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface InputBarProps {
   onSend: (text: string, file?: FileAttachment) => void;
@@ -79,7 +80,13 @@ const InputBar: React.FC<InputBarProps> = ({
     e.target.value = ''; // Reset input
   };
 
+  const { user } = useAuth();
+
   const triggerFileSelect = () => {
+    if (!user) {
+      onSend('', undefined); // Dispara a verificação de login que abre o AuthModal no App.tsx
+      return;
+    }
     fileInputRef.current?.click();
   };
 

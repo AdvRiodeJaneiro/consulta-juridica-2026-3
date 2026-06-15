@@ -87,6 +87,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ state, settings, onSend, 
   };
 
   const triggerFileSelectCard = (type: string) => {
+    if (!profile) {
+      onSend('', undefined); // Dispara a verificação de login se não houver perfil ativo
+      return;
+    }
     setActiveRequestType(type);
     fileInputRef.current?.click();
   };
