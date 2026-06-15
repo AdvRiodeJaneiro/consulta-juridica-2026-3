@@ -40,12 +40,14 @@ serve(async (req) => {
     }
 
     // Chat com Streaming
+    const promptParts = Array.isArray(prompt) ? prompt : [{ text: prompt }];
+
     const response = await fetch(`${BASE_URL}:streamGenerateContent?alt=sse&key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         system_instruction: { parts: [{ text: settings?.systemInstruction }] },
-        contents: [...history, { role: 'user', parts: [{ text: prompt }] }],
+        contents: [...history, { role: 'user', parts: promptParts }],
         generationConfig: {
           temperature: 1.0, // Recomendado para Gemini 3
           topP: 0.95,

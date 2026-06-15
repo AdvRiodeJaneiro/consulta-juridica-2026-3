@@ -1,10 +1,18 @@
 export type Role = 'user' | 'model';
 
+export interface FileAttachment {
+  name: string;
+  type: string;
+  base64: string;
+  size: number;
+}
+
 export interface Message {
   id: string;
   role: Role;
   content: string;
   timestamp: number;
+  file?: FileAttachment;
 }
 
 export interface ChatState {

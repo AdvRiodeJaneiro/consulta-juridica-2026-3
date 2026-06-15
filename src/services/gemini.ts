@@ -1,5 +1,5 @@
 import { generateSystemInstruction } from "../constants";
-import { Message, AdminSettings } from "../types";
+import { Message, AdminSettings, FileAttachment } from "../types";
 
 // Armazenamento global de logs para o Inspetor
 (window as any).__GEMINI_DEBUG_LOGS = {
@@ -15,15 +15,41 @@ import { Message, AdminSettings } from "../types";
 const FUNCTION_URL = "https://roqhysljzhzcsyuiumpw.supabase.co/functions/v1/gemini-chat";
 const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvcWh5c2xqemh6Y3N5dWl1bXB3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzE3NzgsImV4cCI6MjA4NTkwNzc3OH0.AyFrLp0tQq0w8tQC-zLselO_UomIZYAbEBQqCGSq9y0";
 
-export const getGeminiStreamResponse = async (history: Message[], prompt: string, settings: AdminSettings) => {
-  const formattedHistory = history.map(msg => ({
-    role: msg.role === 'user' ? 'user' : 'model',
-    parts: [{ text: msg.content }]
-  }));
+export const getGeminiStreamResponse = async (
+  history: Message[],
+  prompt: string,
+  settings: AdminSettings,
+  file?: FileAttachment
+) => {
+  const formattedHistory = history.map(msg => {
+    const parts: any[] = [{ text: msg.content }];
+    if (msg.file) {
+      parts.unshift({
+        inlineData: {
+          mimeType: msg.file.type,
+          data: msg.file.base64
+        }
+      });
+    }
+    return {
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts
+    };
+  });
+
+  const promptParts: any[] = [{ text: prompt }];
+  if (file) {
+    promptParts.unshift({
+      inlineData: {
+        mimeType: file.type,
+        data: file.base64
+      }
+    });
+  }
 
   const payload = {
     history: formattedHistory,
-    prompt,
+    prompt: file ? promptParts : prompt,
     settings: {
       ...settings,
       systemInstruction: generateSystemInstruction(settings, history)

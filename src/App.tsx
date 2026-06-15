@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { ChatState, Message, AdminSettings } from './types';
+import { ChatState, Message, AdminSettings, FileAttachment } from './types';
 import LandingPage from './components/LandingPage';
 import ChatInterface from './components/ChatInterface';
 import AdminPage from './components/AdminPage';
@@ -73,15 +73,15 @@ const AppContent: React.FC = () => {
     fetchSettings();
   }, [profile?.credits_used]);
 
-  const handleSendMessage = useCallback(async (text: string) => {
+  const handleSendMessage = useCallback(async (text: string, file?: FileAttachment) => {
     if (!user) {
       setPendingMessage(text);
       setIsAuthModalOpen(true);
       return;
     }
 
-    const limit = profile?.role === 'admin' 
-      ? adminSettings.adminMonthlyLimit 
+    const limit = profile?.role === 'admin'
+      ? adminSettings.adminMonthlyLimit
       : (profile?.total_purchased_credits || 0) + adminSettings.freeMonthlyLimit;
 
     if ((profile?.credits_used || 0) >= limit) {
@@ -89,12 +89,18 @@ const AppContent: React.FC = () => {
       return;
     }
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text, timestamp: Date.now() };
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text,
+      timestamp: Date.now(),
+      ...(file ? { file } : {})
+    };
     setChatState(prev => ({ ...prev, messages: [...prev.messages, userMsg], isThinking: true }));
     if (location.pathname !== '/chat') navigate('/chat');
 
     try {
-      const stream = await getGeminiStreamResponse(chatState.messages, text, adminSettings);
+      const stream = await getGeminiStreamResponse(chatState.messages, text, adminSettings, file);
       const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'model', content: '', timestamp: Date.now() };
       
       setChatState(prev => ({ ...prev, messages: [...prev.messages, aiMsg], isThinking: false }));
