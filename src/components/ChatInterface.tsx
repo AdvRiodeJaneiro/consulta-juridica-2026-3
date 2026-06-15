@@ -3,7 +3,7 @@ import { Message, ChatState, AdminSettings, FileAttachment } from '../types';
 import InputBar from './InputBar';
 import MarkdownText from './MarkdownText';
 import { generateWhatsAppLink, detectPositiveIntent } from '../services/whatsapp';
-import { MessageCircle, Lock, Zap, FileText, Paperclip, CheckCircle } from 'lucide-react';
+import { MessageCircle, Lock, Zap, FileText, Paperclip, CheckCircle, Copy, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +24,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ state, settings, onSend, 
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null);
   const [attachedFile, setAttachedFile] = useState<FileAttachment | null>(null);
   const [activeRequestType, setActiveRequestType] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (id: string, text: string) => {
+    // Remove a tag de anexo do texto copiado para que o usuário receba apenas o texto puro da IA
+    const cleanedText = text.replace(/\[SOLICITAR_ANEXO:[A-Z]+\]/g, '').trim();
+    navigator.clipboard.writeText(cleanedText).then(() => {
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+  };
 
   const creditsUsed = profile?.credits_used || 0;
   const creditsLimit = profile?.role === 'admin'
@@ -203,7 +213,22 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ state, settings, onSend, 
           
           return (
             <div key={msg.id} className={cn("flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300", msg.role === 'user' ? 'items-end' : 'items-start')}>
-              <div className={cn("max-w-[90%] rounded-2xl p-4 shadow-xl", msg.role === 'user' ? 'bg-champagne text-white' : 'bg-[#1A2333] text-gray-100')}>
+              <div className={cn("max-w-[90%] rounded-2xl p-4 shadow-xl relative group/msg", msg.role === 'user' ? 'bg-champagne text-white' : 'bg-[#1A2333] text-gray-100')}>
+                
+                {msg.role === 'model' && (
+                  <button
+                    onClick={() => handleCopy(msg.id, msg.content)}
+                    className="absolute top-3 right-3 p-1.5 rounded-lg bg-gray-900/60 hover:bg-gray-950 text-gray-400 hover:text-white opacity-0 group-hover/msg:opacity-100 transition-all duration-200 z-10"
+                    title="Copiar mensagem"
+                  >
+                    {copiedId === msg.id ? (
+                      <Check className="w-3.5 h-3.5 text-green-400 animate-in zoom-in-75 duration-200" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                )}
+
                 <MarkdownText content={cleanedContent} />
                 
                 {/* Exibição do Arquivo se estiver anexado à mensagem */}
