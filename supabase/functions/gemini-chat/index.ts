@@ -28,14 +28,14 @@ serve(async (req) => {
           contents: [{
             parts: [
               { inlineData: { data: audio, mimeType: mimeType } },
-              { text: "Transcreva este áudio jurídico exatamente como falado." }
+              { text: "Transcreva o áudio jurídico a seguir. Remova vícios de linguagem e corrija o português. Retorne APENAS a transcrição corrigida e limpa, sem qualquer introdução, explicação, aspas ou prefácios (NÃO diga 'Aqui está a transcrição:' ou similar)." }
             ]
           }]
         })
       });
       const data = await response.json();
-      return new Response(JSON.stringify({ text: data.candidates?.[0]?.content?.parts?.[0]?.text }), { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      return new Response(JSON.stringify({ text: data.candidates?.[0]?.content?.parts?.[0]?.text }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 

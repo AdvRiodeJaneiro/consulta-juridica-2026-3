@@ -17,7 +17,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartChat }) => {
         <p className="text-lg text-gray-400">Excelência jurídica com a agilidade da inteligência artificial.</p>
       </div>
       <div className="w-full max-w-3xl">
-        <InputBar onSend={onStartChat} placeholder="Descreva seu caso aqui..." />
+        <InputBar onSend={onStartChat} placeholder="Descreva seu caso aqui..." attachedFile={null} onAttachFile={() => {}} />
       </div>
     </div>
   );
