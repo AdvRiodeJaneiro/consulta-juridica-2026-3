@@ -12,6 +12,7 @@ import PlansManagement from './pages/PlansManagement';
 import SubscribePlan from './pages/SubscribePlan';
 import UsageLimits from './pages/UsageLimits';
 import MyAccount from './pages/MyAccount';
+import SeoManagement from './pages/SeoManagement';
 import Modal from './components/Modal';
 import AuthModal from './components/AuthModal';
 import LimitModal from './components/LimitModal';
@@ -187,6 +188,7 @@ const AppContent: React.FC = () => {
         <Route path="/adm/usuarios" element={<ProtectedRoute adminOnly><DashboardLayout><UsersManagement /></DashboardLayout></ProtectedRoute>} />
         <Route path="/adm/planos" element={<ProtectedRoute adminOnly><DashboardLayout><PlansManagement /></DashboardLayout></ProtectedRoute>} />
         <Route path="/adm/limites" element={<ProtectedRoute adminOnly><DashboardLayout><UsageLimits /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/adm/seo" element={<ProtectedRoute adminOnly><DashboardLayout><SeoManagement /></DashboardLayout></ProtectedRoute>} />
         <Route path="/adm/configuracoes" element={<ProtectedRoute adminOnly><DashboardLayout><AdminPage settings={adminSettings} onSave={async (newSettings) => {
           const { data: current } = await supabase.from('admin_settings').select('id').limit(1).single();
           if (current) {

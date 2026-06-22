@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   Gavel,
   Sliders,
-  X
+  X,
+  Globe
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { cn } from '../lib/utils';
@@ -58,6 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { id: 'plans-mgmt', label: 'Gestão de Planos', icon: Settings, path: '/adm/planos' },
     { id: 'limits', label: 'Limites de Uso', icon: ShieldCheck, path: '/adm/limites' },
     { id: 'config', label: 'Cérebro da IA', icon: Sliders, path: '/adm/configuracoes' },
+    { id: 'seo-config', label: 'SEO Google', icon: Globe, path: '/adm/seo' },
   ];
 
   // Cálculo de limites globais + créditos comprados acumulativos
