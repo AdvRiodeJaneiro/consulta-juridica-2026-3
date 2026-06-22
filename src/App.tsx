@@ -66,12 +66,39 @@ const AppContent: React.FC = () => {
           whatsappNumber: data.whatsapp_number,
           internalInstructions: data.internal_instructions,
           freeMonthlyLimit: typeof data.free_monthly_limit === 'number' ? data.free_monthly_limit : 3,
-          adminMonthlyLimit: typeof data.admin_monthly_limit === 'number' ? data.admin_monthly_limit : 9999
+          adminMonthlyLimit: typeof data.admin_monthly_limit === 'number' ? data.admin_monthly_limit : 9999,
+          seoTitle: data.seo_title || undefined,
+          seoDescription: data.seo_description || undefined,
+          seoKeywords: data.seo_keywords || undefined
         });
       }
     };
     fetchSettings();
   }, [profile?.credits_used]);
+
+  useEffect(() => {
+    if (adminSettings.seoTitle) {
+      document.title = adminSettings.seoTitle;
+    }
+    if (adminSettings.seoDescription) {
+      let metaDesc = document.querySelector('meta[name="description"]');
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta');
+        metaDesc.setAttribute('name', 'description');
+        document.head.appendChild(metaDesc);
+      }
+      metaDesc.setAttribute('content', adminSettings.seoDescription);
+    }
+    if (adminSettings.seoKeywords) {
+      let metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (!metaKeywords) {
+        metaKeywords = document.createElement('meta');
+        metaKeywords.setAttribute('name', 'keywords');
+        document.head.appendChild(metaKeywords);
+      }
+      metaKeywords.setAttribute('content', adminSettings.seoKeywords);
+    }
+  }, [adminSettings]);
 
   const [pendingFile, setPendingFile] = useState<FileAttachment | null>(null);
 
@@ -173,7 +200,10 @@ const AppContent: React.FC = () => {
               whatsapp_number: newSettings.whatsappNumber,
               internal_instructions: newSettings.internalInstructions,
               free_monthly_limit: newSettings.freeMonthlyLimit,
-              admin_monthly_limit: newSettings.adminMonthlyLimit
+              admin_monthly_limit: newSettings.adminMonthlyLimit,
+              seo_title: newSettings.seoTitle,
+              seo_description: newSettings.seoDescription,
+              seo_keywords: newSettings.seoKeywords
             }).eq('id', current.id);
             setAdminSettings(newSettings);
           }

@@ -31,6 +31,9 @@ export interface AdminSettings {
   internalInstructions: string;
   freeMonthlyLimit: number;
   adminMonthlyLimit: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
 }
 
 export interface Plan {

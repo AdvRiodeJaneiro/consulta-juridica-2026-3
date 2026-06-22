@@ -12,7 +12,10 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
   whatsappNumber: "21998702613",
   internalInstructions: "Mantenha um tom formal porém acolhedor. Use terminologia jurídica técnica mas explique-a de forma simples (linguagem cidadã). Sempre faça quando perguntado uma estimativa de cálculo de rescisão trabalhista baseada no valor do último salário, bem como tempo de serviço.",
   freeMonthlyLimit: 3,
-  adminMonthlyLimit: 9999
+  adminMonthlyLimit: 9999,
+  seoTitle: "Consulta Jurídica IA - Magalhães & Gomes",
+  seoDescription: "Excelência jurídica com a agilidade da inteligência artificial. Faça sua consulta estratégica online.",
+  seoKeywords: "advogado, consulta juridica, inteligencia artificial, juros abusivos, direito, escritorio de advocacia"
 };
 
 export const generateSystemInstruction = (settings: AdminSettings, history: Message[]) => {
