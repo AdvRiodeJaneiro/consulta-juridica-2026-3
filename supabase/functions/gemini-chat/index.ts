@@ -84,17 +84,26 @@ serve(async (req) => {
       messages.push({ role: "system", content: settings.systemInstruction });
     }
 
+    // Ordenação correta: System -> History -> Current Prompt
+    // Garantimos que todo o conteúdo histórico seja enviado sem perdas
     for (const entry of history) {
       const role = entry.role === 'model' ? 'assistant' : 'user';
-      const content = entry.parts.map((p: any) => p.text || "").join("\n");
-      messages.push({ role, content });
+      const content = entry.parts.map((p: any) => p.text || "").join("\n").trim();
+      if (content) {
+        messages.push({ role, content });
+      }
     }
 
     const userContent = Array.isArray(prompt)
       ? prompt.map((p: any) => p.text || "").join("\n")
       : prompt;
       
-    messages.push({ role: "user", content: userContent });
+    if (userContent) {
+      messages.push({ role: "user", content: userContent });
+    }
+
+    // Console log para monitoramento via Supabase Logs
+    console.log(`[ai-chat] DeepSeek Request: ${messages.length} mensagens. System length: ${settings?.systemInstruction?.length || 0}`);
 
     const response = await fetch("https://api.deepseek.com/chat/completions", {
       method: 'POST',
