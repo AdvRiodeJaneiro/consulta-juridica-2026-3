@@ -103,10 +103,20 @@ export const getGeminiStreamResponse = async (
           try {
             // Remove o prefixo "data: " e tenta parsear o JSON
             const jsonStr = trimmed.replace('data: ', '');
+            if (jsonStr === '[DONE]') continue;
+
             const data = JSON.parse(jsonStr);
             
-            // Extrai o texto conforme a estrutura do Gemini 3
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            // Parser Inteligente: Tenta extrair texto de ambos os formatos (DeepSeek/OpenAI vs Gemini)
+            let text = '';
+            
+            if (data.choices?.[0]?.delta?.content) {
+              // Formato DeepSeek/OpenAI
+              text = data.choices[0].delta.content;
+            } else if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+              // Formato Gemini
+              text = data.candidates[0].content.parts[0].text;
+            }
             
             if (text) {
               (window as any).__GEMINI_DEBUG_LOGS.lastResponse = text;
