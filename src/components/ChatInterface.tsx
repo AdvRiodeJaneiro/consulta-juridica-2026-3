@@ -259,7 +259,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ state, settings, onSend, 
           );
         })}
 
-        {state.isThinking && (
+        {state.isThinking && !state.messages[state.messages.length - 1]?.content.length && (
           <div className="flex flex-col items-start animate-in fade-in duration-300">
             <div className="bg-[#1A2333] rounded-2xl p-4 shadow-xl flex items-center gap-1.5">
               <div className="w-2 h-2 bg-champagne rounded-full animate-bounce [animation-delay:-0.3s]" />
